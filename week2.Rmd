@@ -1,0 +1,69 @@
+```{r}
+dim(gapminder)
+```
+
+```{r}
+gapmindervariable<- names(gapminder); gapmindervariable
+```
+
+```{r}
+head(gapminder)
+tail(gapminder, n=10)
+```
+
+
+```{r}
+sapply(gapminder, class)
+```
+
+```{r}
+unique(gapminder$country)
+```
+
+```{r}
+unique(gapminder$continent)
+```
+
+```{r}
+onlyAus <- subset(gapminder, gapminder$country=="Australia")
+```
+
+```{r}
+averagelifeexp<- mean(onlyAus$lifeExp)
+tail(onlyAus$lifeExp, n=1) - averagelifeexp
+
+```
+
+```{r}
+#produce pairwise, scallterplots
+```
+
+```{r}
+burundilifeexp <- subset(gapminder, gapminder$country=="Burundi")
+
+head(burundilifeexp$lifeExp, n=1) / tail(burundilifeexp$lifeExp, n=1)
+```
+
+
+```{r}
+which(gapminder$country=="Swaziland")
+```
+
+```{r}
+only2007 <-   subset(gapminder, gapminder$year=="2007")
+```
+
+```{r}
+sapply(only2007)
+```
+
+
+
+
+
+
+
+
+
+
+
