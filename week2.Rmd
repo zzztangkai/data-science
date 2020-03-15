@@ -1,61 +1,107 @@
+#1.How big is the dataset?
 ```{r}
 dim(gapminder)
 ```
-
+#2.How many variables are in the dataset? What are they?
 ```{r}
-gapmindervariable<- names(gapminder); gapmindervariable
+colnames(gapminder)
 ```
-
+#3.How would you examine the first and last few rows of the dataset
 ```{r}
 head(gapminder)
 tail(gapminder, n=10)
 ```
-
-
+#4.What is the class of each of the variables? In other words, what types of variables are they?
 ```{r}
-sapply(gapminder, class)
+str(gapminder)
 ```
-
+#5.How many countries are represented
 ```{r}
-unique(gapminder$country)
+length(unique(gapminder$country))
 ```
-
+#6.How many continents are represented?
 ```{r}
-unique(gapminder$continent)
+length(unique(gapminder$continent))
 ```
-
+#7.Create a new dataset containing only the data for Australia
 ```{r}
 onlyAus <- subset(gapminder, gapminder$country=="Australia")
 ```
-
+#8.Calculate the increase in average life expectancy for Australians over the time period in the dataset.
 ```{r}
-averagelifeexp<- mean(onlyAus$lifeExp)
-tail(onlyAus$lifeExp, n=1) - averagelifeexp
-
+tail(onlyAus$lifeExp, n=1) - head(onlyAus$lifeExp, n=1)
 ```
-
+#9.Produce pairwise scatterplots of the three numerical variables for Australia.
 ```{r}
 #produce pairwise, scallterplots
+plot(onlyAus[4:6])
+plot(subset(onlyAus, select =c(lifeExp, pop, gdpPercap)), labels =c("life expectancy", "population", "GDP per capita"))
 ```
-
+#10.What is the increase in life expectancy for Burundi?
 ```{r}
 burundilifeexp <- subset(gapminder, gapminder$country=="Burundi")
 
-head(burundilifeexp$lifeExp, n=1) / tail(burundilifeexp$lifeExp, n=1)
+tail(burundilifeexp$lifeExp, n=1) - head(burundilifeexp$lifeExp, n=1)
 ```
-
-
+#11.In which rows of the dataset does Swaziland occur?
 ```{r}
 which(gapminder$country=="Swaziland")
 ```
-
+#12. How would you create a dataset that contains only the data for 2007 for all countries?
 ```{r}
-only2007 <-   subset(gapminder, gapminder$year=="2007")
+Only2007 <-   subset(gapminder, gapminder$year=="2007")
+```
+#13.Which country had the lowest life expectancy in 2007? Which had the highest?
+```{r}
+Only2007[which.min(Only2007$lifeExp),]
+Only2007[which.max(Only2007$lifeExp),]
+```
+#14. What is the mean GDP per capita in each country?
+```{r}
+tapply(Only2007$gdpPercap, Only2007$country, mean)
+```
+#15.Do all countries have data in the same range of years?
+```{r}
+tapply(gapminder$year, gapminder$country, range)
+```
+#16.Construct a dataset consisting of only the life expectancy over time for all countries.
+```{r}
+LifeExp <- gapminder$lifeExp
+LifeExp <- matrix(LifeExp, nrow = 12, ncol = 142)
+colnames(LifeExp) <- unique(gapminder$country)
+rownames(LifeExp) <- unique(gapminder$year)
+LifeExp[1:12, 1:142]
+```
+#17.Plot a time series plot of the life expectancy against time for all countries on the same plot.
+```{r}
+
+FiveCols <-c("red3", "royalblue4", "springgreen4", "mediumpurple3", "orange2")
+ContinentCols <-FiveCols <-c("red3", "royalblue4", "springgreen4", "mediumpurple3", "orange2")[tapply(gapminder$continent,gapminder$country, 
+                                              function(x){
+                                                unique(x)
+                                              })]
+matplot(rownames(LifeExp), LifeExp, xlab="Year", ylab="Life Expectancy", type = "l", lty = 1, col = ContinentCols, ylim = c(10,82))
+legend("bottomright", col=FiveCols, legend=levels(gapminder$continent),lty=1, bty="n")
 ```
 
-```{r}
-sapply(only2007)
-```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
