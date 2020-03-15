@@ -1,0 +1,113 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+```{r}
+summary
+```
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
+
+```{r}
+
+
+A <- 10; B <- 2
+C <- A/B
+C
+```
+
+```{r}
+x <- c(0, pi/4, pi/2, 3*pi/4, pi, 5*pi/4, 3*pi/2, 7*pi/4, 2*pi); x
+```
+
+
+```{r}
+x <- seq(from=0, to= 2*pi, by=pi/4); x
+```
+
+
+```{r}
+y <- sin(x);
+y
+```
+
+
+```{r}
+z <- 1:10;
+z
+```
+
+```{r}
+x[1:3]
+
+```
+
+```{r}
+x[c(1,2,3)]
+x[c(1:3)]
+```
+
+
+```{r}
+x[c(1,6)] # select the 2nd and 6th  element of x
+y[-1]  #not selelct the first element of y 
+y[2:length(y)] # selelct from second to last element of y
+```
+
+```{r}
+#2+"black" # non-numeroc argument to binary operatore
+```
+
+```{r}
+typeof(3.14)  #double
+typeof(1L) # conver 1 to integer
+typeof(5+4i)# complex
+typeof(c(TRUE,FALSE))  #logical
+typeof("black")  #char
+```
+
+```{r}
+plot(x,y)
+```
+
+
+```{r}
+plot(x,y, type="b")
+```
+
+
+```{r}
+plot(x,y, type="b", xlab="this is xlab", ylab="this is ylab", main="this is the title", col="blue")
+```
+
+```{r}
+download.file("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/gh-pages/_episodes_rmd/data/gapminder-FiveYearData.csv", destfile = "gapminder-FiveYearData.csv") # download the data from the web
+
+gapminder <- read.csv("gapminder-FiveYearData.csv")
+```
+
+```{r}
+z <- gapminder$lifeExp; typeof(z)
+zz <- gapminder$year; typeof(zz)
+```
+
+```{r}
+library(lattice)
+xyplot(lifeExp ~ gdpPercap | year, data=gapminder, 
+       grid=TRUE, xlab="GDP per capita", ylab="life expectancey (years)",
+       scales=list(x=list(log=10,equispaced.log = FALSE)),
+       group = continent, 
+       auto.key=list(space="right"))
+```
+
