@@ -50,6 +50,7 @@ which(gapminder$country=="Swaziland")
 #12. How would you create a dataset that contains only the data for 2007 for all countries?
 ```{r}
 Only2007 <-   subset(gapminder, gapminder$year=="2007")
+Only2007
 ```
 #13.Which country had the lowest life expectancy in 2007? Which had the highest?
 ```{r}
@@ -58,7 +59,7 @@ Only2007[which.max(Only2007$lifeExp),]
 ```
 #14. What is the mean GDP per capita in each country?
 ```{r}
-tapply(Only2007$gdpPercap, Only2007$country, mean)
+tapply(gapminder$gdpPercap, gapminder$country, mean)
 ```
 #15.Do all countries have data in the same range of years?
 ```{r}
