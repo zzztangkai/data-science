@@ -3,14 +3,19 @@ library(gapminder)
 ```
 #1. Construct a plot of the average life expectancy over the last four years in each country against its average GDP per capita over that same time period, and label it appropriately.
 ```{r}
-LastFourYearLifeExp <- LifeExp[9:12, 1:142]
+#Average of last 4 year of Life expectancy
+LastFourYearLifeExp <- LifeExp[9:12,]
+
 AverageLifeExp <- colMeans(LastFourYearLifeExp)
+
+#Average of last 4 year of GDP
 OnlyGDP <- gapminder$gdpPercap
 OnlyGDP <- matrix(OnlyGDP, nrow=12, ncol=142)
 colnames(OnlyGDP) <- unique(gapminder$country)
 rownames(OnlyGDP) <- unique(gapminder$year)
 LastFourYearGDP <- OnlyGDP[9:12, 1:142]
 AverageGDP <- colMeans(LastFourYearGDP)
-plot(AverageGDP)
+
+plot(x=LastFourYearGDP, y=LastFourYearLifeExp, type="p", log = "x", xlab = "GDP", ylab = "LifeExp")
 ```
 

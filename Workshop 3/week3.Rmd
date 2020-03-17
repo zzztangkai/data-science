@@ -84,18 +84,7 @@ ContinentCols <-FiveCols <-c("red3", "royalblue4", "springgreen4", "mediumpurple
 matplot(rownames(LifeExp), LifeExp, xlab="Year", ylab="Life Expectancy", type = "l", lty = 1, col = ContinentCols, ylim = c(10,82))
 legend("bottomright", col=FiveCols, legend=levels(gapminder$continent),lty=1, bty="n")
 ```
-
-
-
-
-
-
-
-
-
-
-
-
+#18. 
 
 
 
