@@ -1,0 +1,209 @@
+---
+title: "STAT1003 Introduction to Data Science"
+author: '**Practice Test 1**'
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+  html_notebook:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+  word_document: 
+    highlight: tango
+    toc: yes
+---
+
+```{r echo=FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, message=FALSE, tidy=TRUE, error=TRUE)
+```
+
+# Instructions
+1. Save this file to `I:\STAT1003` and rename it `StudentID.Rmd`;
+2. Download and save the file `STAT1003_Practice_Test1.RData` **along with any image files** into the same directory;
+3. Carry out all of your work in this Rmarkdown file; 
+4. <span style="color:#C40000">**Save your work frequently!**</span>
+5. When you are finished, upload this Rmarkdown file and the resulting 'knitted' .docx file to the Assessments section from which you downloaded the files.
+6. Total number of marks: **52**
+
+```{r}
+# Load the .RData file here
+load("STAT1003_Practice_Test1.RData")
+```
+
+# Question 1 <span style="color:#C40000">Short Answer Questions</span>
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+**Example answers only**
+
+(a) If someone who didn't know anything about data science were to ask you what it is, how would you describe it? What are some of the defining features of contemporary data science? (4 marks)
+
+    **Answer**: Contemporary data science sits at the intersection of several domains: statistics, computer science, visualization, and communication. Some of the defining features include very large datasets; data that is passively measured or observed; a focus on predictive rather than generative models; an emphasis on new ways of visualizing data, especially dynamic visualization; and obtaining, analyzing, predicting and visualizing data in real-time.
+
+(b) Nate Silver, a well-known statistician who famously predicted every state that Obama carried in 2012, said in 2013 that "Statistics is a branch of science. Data scientist is slightly redundant in some way and people shouldn't berate the term statistician." Is he right or wrong? Why? (3 marks)
+
+    **Answer**: here are many aspects (see (a)) of data science that have never been part of a 'traditional' statistics curriculum; just to mention one, real-time deployment of, for example, predictive models, or sophisticated dynamic visualization, both of which are the domain of computer science.
+
+(c) The CSIRO website https://wefeel.csiro.au carries out semantic analysis on a large number of English-language tweets from around the world and then classifies them in categories such as 'joy', 'anger', etc. Is such an application useful for identifying periods when the population at large might be 'sad', thus allowing government agencies to intervene with, for example, public health campaigns? Why or why not? (3 marks)
+
+    **Answer**: There are lots of people tweeting, but they constitute only a very small fraction of the entire population of any particular country, and they certainly cannot be said to be a random sample! Hence, any intervention based on admittedly nebulous terms such as 'joy', 'anger', etc. would only be targetting a very particular demographic. For more information see [this link](http://www.smh.com.au/nsw/the-csiro-data-toll-that-monitors-our-emotions-on-social-media-20170315-guyh3s.html).
+
+(d) Briefly explain why the two figures below are misleading. The first one is meant to compare doctors' salaries with those of other professional, while the second one compares the proportion of men and women in different faculties at US universities. (Source: [Ross Ihaka](https://www.stat.auckland.ac.nz/~ihaka/120/)) (4 marks)
+
+<center>
+![Doctor's salaries](Incomes.png)
+</center>
+<p></p>    
+    
+   **Answer**: If we looked at this plot quickly, we might assume that yearly data is plotted on the horizontal axis. Clearly, however, there are lots of missing years, especially in the early part of the series, and this distorts the plot considerable.
+
+<center>
+![Proportion of men and women in different university faculties](Faculties.png)
+</center>
+<p></p>
+        
+  **Answer**: In this plot, our eyes are naturally drawn to the widths of the bars representing men and women, and so we might quickly interpret the relative proportion of men and women accordingly. However, the horizontal scale is logarithmic, so interpreting the widths as relative proportions would be misleading.
+
+</div></p>
+
+# Question 2 <span style="color:#C40000">Cherry Blossom Race</span>
+
+The Cherry Blossom 10-Mile Run is a road race held in Washington, D.C. in April of each year. The name comes from the cherry trees that bloom around the date of the race. The object `Cherry` contains results from 1999 to 2008 and has the following variables:
+
+* `name.yob`: a unique identifier for each runner composed of the runner's full name and year of birth.
+
+* `age`: integer giving the runner's age in the race whose result is being reported.
+
+* `gun`: the number of minutes elapsed from the starter's gun to the person crossing the finish line
+
+* `net`: the number of minutes elapsed from the runner's crossing the start line to crossing the finish line.
+
+* `sex`: the runner's sex
+
+* `year`: the year of that race
+
+* `previous`: integer specifying how many times previous to this race the runner had participated in the years 1999 to 2008.
+
+* `nruns`: integer giving the total number of times that runner participated in the years from 1999 to 2008.
+
+Because there are so many runners taking part in the race and they can't all line up at the starting line all at once, the `net` time will generally be shorter than the `gun` time. Make sure you understand what all the variables mean.
+
+**Make sure that all plots are correctly labelled. A main title is not required, unless explicitly specified.**
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+(a) How many rows are in `Cherry`? What does each row represent? (2 marks)
+
+    **Answer**: There are `r nrow(Cherry)` rows in `Cherry`. Each row represents a runner in one year's race. (Many individuals ran the race several times over the time period in question.)</span>
+
+
+(b) Which of the variables are categorical, and which are quantitative? (3 marks)
+
+```{r}
+str(Cherry)
+```
+    
+  **Answer**: The variables `name.yob` and `sex` are the only categorical variable; the remainder are quantitative.
+
+(c) Produce a barplot showing the number of runners in each year. You will also find the function `table` very useful. Which year had the most number of runners, and how many were there? (3 marks)
+
+```{r}
+barplot(table(Cherry$year), xlab = "Year", ylab = "number of runners", col = "lightsteelblue")
+```
+           
+  **Answer**: There were `r max(table(Cherry$year))` runners in `r as.numeric(names(which.max(table(Cherry$year))))`.
+
+(d) What is the age-range of runners over the entire time period? (1 mark)
+
+```{r}
+range(Cherry$age)
+```
+
+(e) Has the age-range of runners changed over the years? Use `tapply` to output the range of ages in each year the race was run. (3 marks)
+
+```{r}
+# tapply(Cherry$age, Cherry$year, range) # a bit messy, so try this:
+AgeRange <- matrix(unlist(tapply(Cherry$age, Cherry$year, range)), nrow = 2, byrow = FALSE)
+colnames(AgeRange) <- sort(unique(Cherry$year))
+rownames(AgeRange) <- c("min", "max")
+AgeRange
+```
+    
+  **Answer**: The age range hasn't really changed much over the years, though there haven't been any 12-year olds running the race in recent years!
+
+(f) How many unique runners ran in the race? (1 mark)
+
+```{r}
+length(unique(Cherry$name.yob))
+```
+
+(g) Produce a table showing the number of individuals who ran the race $2, 3, \ldots,$ number of times. (3 marks)
+
+```{r}
+table(tapply(Cherry$nruns, Cherry$name.yob, unique))
+```
+
+(h) Produce a barplot of the summary in (g). (2 marks)
+
+```{r}
+barplot(table(tapply(Cherry$nruns, Cherry$name.yob, unique)), xlab = "number of races", ylab = "number of individuals", col = "seagreen")
+```
+
+(i) Create a separate dataset with only those individuals who have run the race in each year (i.e., for 10 years). (2 marks)
+
+```{r}
+Cherry10 <- Cherry[Cherry$nruns == 10, ]
+```
+
+(j) How many males and females ran the race during all these years? (2 marks)
+
+```{r}
+table(Cherry10$sex)/10
+```
+
+
+(k) Output the first 11 columns of this new dataset. You should notice that one of the columns has the symbol `NA` instead of a number. This represents a missing value - for whatever reason, the time was not recorded, or the person didn't finish the race. When calculating numerical summaries, missing values are a pain, but you can exclude them by including the argument `na.rm = TRUE` in a function.
+    
+    So, of the people who ran the race in all years, determine the fastest `net` time for males and females, and don't forget the additional argument! (3 marks)
+
+```{r}
+head(Cherry10, n = 11)
+```
+
+
+```{r}
+min(Cherry10$net[Cherry10$sex == "M"], na.rm = TRUE)
+min(Cherry10$net[Cherry10$sex == "F"], na.rm = TRUE)
+```
+
+(l) Using the object you created in (i), create a dataset - it could be a matrix, for example - that contains only the `gun` times of these individuals in each of the 10 years. It would make more sense to have years down the rows, and individuals across the columns. Add column and row names. (4 marks)
+
+```{r}
+GunTimes10 <- matrix(Cherry10$gun, nrow = 10, byrow = FALSE)
+colnames(GunTimes10) <- unique(Cherry10$name.yob)
+rownames(GunTimes10) <- unique(Cherry10$year)
+```
+
+(m) Plot the gun times of these runners over time. This plot will need a main title. Comment briefly on any patterns you see in the plot. (4 marks)
+
+```{r}
+matplot(rownames(GunTimes10), GunTimes10, type = "l", 
+        xlab = "Year", ylab = "Gun time (minutes)", lty = 1, lwd = 1.5,
+        main = "Gun times of people who ran between 1999 and 2008")
+```
+
+**Answer**: Some people show a great deal of variability in their gun times (within 30 minutes or so), and one person, who had fast times, had relatively little variation.
+
+(n) Redraw the plot in (m), but this time colour the males and females in different colours. You will find it useful to create a separate vector containing the sex of each of the runners in this dataset. Add a legend. (5 marks)
+
+```{r}
+Sex10 <- tapply(Cherry10$sex, Cherry10$name.yob, function(x){x[!duplicated(x)]})
+MFCols <- sapply(Sex10, function(x)(if(x == "M") "blue" else "magenta"))
+matplot(rownames(GunTimes10), GunTimes10, type = "l", 
+        xlab = "Year", ylab = "Gun time (minutes)", col = MFCols, lwd = 1.5, lty = 1,
+        main = "Gun times of people who ran between 1999 and 2008")
+legend("topleft", legend = c("Males", "Females"), col = c("blue", "magenta"), lty = 1)
+```
+
+</div></p>

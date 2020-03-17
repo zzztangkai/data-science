@@ -1,0 +1,248 @@
+---
+title: "STAT1003"
+author: "**Introduction to Data Science**"
+date: "Solution: Workshop 11"
+output:
+  html_document:
+    highlight: haddock
+    theme: flatly
+    toc: yes
+  html_notebook:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+  pdf_document:
+    highlight: haddock
+  word_document:
+    highlight: haddock
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, tidy=TRUE, message=FALSE, warning=FALSE, error=TRUE)
+```
+
+
+# Introduction
+
+We analyzed the Alzheimer's data in Workshop 10 using logistic regression and $K$-nearest neighbours. Here, we will analyze them using a classification tree, as well as random forests. The datasets (`testing` and `training`) are identical to those in the earlier workshop, and are contained in `S1_2019_STAT1003_Workshop_11.RData` along with the data for the Cleveland heart disease study.
+
+Before you begin, make sure that you have the following libraries installed on your computer.
+
+```{r}
+library(rpart)
+library(randomForest)
+library(partykit)
+```
+
+```{r}
+# Load the data here
+print(load("S1_2019_STAT1003_Workshop_11.RData"))
+```
+
+
+# Alzheimer's Data Redux
+
+1.  Recall that the response variable is `Class` and that it has two categories. What are they?
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+The levels are `r levels(testing$Class)`.
+</div></p>
+
+2. Fit a classification tree to the training set using the function `rpart`, and save the results in an object. The syntax is very similar to what you would use to fit a regression model. There are many arguments, and finer-grained control can be obtained by using the function `rpart.control`, but the default result is usually pretty good.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+The syntax for using `rpart` is similar to what you would use for regression:
+
+```{r}
+Alz.rpart <- rpart(Class ~ ., data = training)
+```
+</div></p>
+
+3. Obtain a summary of the object you created above and see if you can understand at least some of the output.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+
+As you may have noticed, the `summary` function produces lots of output, so I've suppressed some of it below using the `cp` argument. Skipping down to the section beginning with the text `Node number 1`, we can see that the output consists of each node, what alternatives the algorithm attempted, and so on. 
+
+```{r}
+summary(Alz.rpart, cp = .16)
+```
+
+The first split occurs with the variable `Ab_42`, with a second possibility being the variable `tau`, and we can see from the plots below that a split of `Ab_42 < 11.28742` separates the classes better than the split of `tau < 5.744661`.
+
+```{r}
+require(lattice)
+par(mfrow = c(1, 2))
+stripplot(Ab_42 ~ Class, data = training, main = "Ab_42", groups = Class)
+stripplot(tau ~ Class, data = training, main = "tau", groups = Class)
+```
+
+</div></p>
+
+
+4. Plot the resulting tree using the function `plot` followed by the function `text` to add labels to the tree. You will see that using default values of the arguments does *not* produce a very appealing graphic! Make the tree bigger by trying different values of `fig.width` and `fig.height` **inside the chunk header**. Once you have constructed the tree, make sure you know how to interpret the result.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+
+```{r fig.height = 7, fig.width = 10}
+plot(Alz.rpart)
+text(Alz.rpart)
+```
+
+The functions `plot` and `text` have additional options to make the display more appealing, but it's easier to use the library `partykit` below. To interpret the tree, we simply follow the branches: for example, if an individual has `Ab_42 < 11.29` and `Creatine_Kinase_MB < -1.608` and `IGF_BP >= 5.147`, then he or she is likely to have mild cognitive impairment.
+
+</div></p>
+
+5. The library `partykit` contains plotting functions that yield more useful and attractive plots. To use it, first convert the `rpart` object you created above using the function `as.party`, and then plot it using the function `plot`. Again, you may have to adjust `fig.height` and `fig.width` inside the chunk header. Can you interpret the terminal nodes?
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+
+The library `partykit` provides additional functions for plotting more meaningful trees. The example below shows the resulting tree produced without additional arguments, but you can look at the documentation to find out how to carry out further customization. One of the nice features of the resulting tree is that it shows the purity of the terminal nodes, and the splits are easier to interpret.
+
+```{r fig.width = 12, fig.height = 9}
+plot(as.party(Alz.rpart), main = "Classification tree for Alzheimer's data")
+```
+
+An alternative to `partykit` is to use functions in the library `rattle`, but it does require the installation of additional programs.
+
+```{r fig.height = 8, fig.width = 10, eval=FALSE}
+# Comment out this code if you do not have the library `rattle` on your computer, 
+# or if you are unable to install it
+library(rattle)
+fancyRpartPlot(Alz.rpart)
+```
+
+</div></p>
+
+
+6. How well does the tree you produced predict the class of the individuals in the test set? Produce a confusion matrix, and compare it with the results you obtained using logistic regression.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+
+The `predict` function for `rpart` objects follows the same syntax that you have seen before for linear or generalized linear models, but you do have to add the additional argument `type = "class"` to get the class predictions instead of the class probabilities. Once we have done so, we can compare the test set predictions to the actual values and then produce a confusion matrix. In the `table` below, note the argument `dnn` that labels the rows and columns of the confusion matrix to make it more informative.
+
+```{r}
+Class.rpart <- predict(Alz.rpart, newdata = testing, type = "class")
+table(Class.rpart, testing$Class, dnn = c("Predictions", "Actual"))
+```
+
+The tree produced above predicts more true positives (`Control`) and fewer negatives (`Impaired`), but it is certainly more interpretable than a logistic regression model.
+</div></p>
+
+7. Can we improve the predictions by using random forests? The function to carry out random forests is `randomForest`, and again, the syntax is straightforward, but you will need to add the argument `importance= TRUE` to ensure that the importance of the predictors is assessed. Use the function `summary` to see what objects are stored in the result, and explore a few of them.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+The syntax of the function `randomForest` is what we might expect. The `summary` function provides with a list of objects stored within the resulting object, and you should be able to tell by their names what information they might contain. For example, the `confusion` object contains the confusion matrix for the test data (see below).
+
+```{r}
+Alz.rf <- randomForest(Class ~ ., data = training, importance = TRUE)
+```
+
+```{r}
+summary(Alz.rf)
+```
+
+```{r}
+Alz.rf$confusion
+```
+
+</div></p>
+
+8. To plot a variable importance plot, you can use the function `varImpPlot` with the object you created above as the first argument. However, it isn't pretty. So, if you want to create one of your own, you will first need to extract the fourth column, the amount by which the variable, on average,  decreases the Gini index. Then, decide how many to display, and produce a horizontal barplot in decreasing order of variable importance, and add some colour to it.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+We can see from the variable importance plot that `Ab_42` and `tau` seem to be important, but going by the results for the single tree and boxplots above, we can see why: on some bootstrapped datasets, `Ab_42` is the first split, on others it is `tau`.
+
+```{r}
+varImpPlot(Alz.rf, n.var = 14, type = 2,
+           main = "Alzheimer's data: variable importance plot")
+```
+
+Here is my version of the variable importance plot:
+
+```{r}
+Alz.rf.imp <- Alz.rf$importance
+Alz.rf.imp14 <- sort(Alz.rf.imp[, 4], decreasing = TRUE)[1:14]
+```
+
+```{r}
+par(oma = c(0, 5, 0, 0))
+par(las = 2)
+barplot(rev(Alz.rf.imp14), horiz = TRUE, col = "royalblue3", 
+        xlab = "variable importance (Gini index)", xaxt = "n",
+        main = "Alzheimer's data: variable importance plot")
+axis(side = 1, at = c(0, 2, 4, 6, 8), labels = c(0, 2, 4, 6, 8), las = 1)
+```
+
+</div></p>
+
+9. How well does the random forest predict compared to a single tree?
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+
+```{r}
+Class.rf <- predict(Alz.rf, newdata = testing)
+table(Class.rf, testing$Class, dnn = c("Predictions", "Actual"))
+```
+
+The random forest picks up more of the `Control` class and 1 fewer of the `Impaired` class.
+</div></p>
+
+
+
+# Cleveland Heart Disease Data
+
+This is a well-known dataset that is available from the [UCI Machine Learning Repository](https://archive.ics.uci.edu/ml/machine-learning-databases/heart-disease/), but the version we're going to use was obtained from the website of [James *et al*. (2013) *An Introduction to Statistical Learning*](http://www-bcf.usc.edu/~gareth/ISL/data.html).
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+The solution below provides the *R* code only.
+</div></p>
+
+
+1. The response variable is `AHD`, which has two classes and indicates the presence or absence of heart disease, but make sure that you explore the other variables as well using functions that you have already seen.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+```{r}
+levels(Heart$AHD)
+```
+</div></p>
+
+2. Use a single tree as well as random forests to predict the presence or absence of heart disease. Follow the pattern above. How well did you do? Don't forget to split the data set into training and test sets.
+
+<p><div class="boxed"><div style="background-color: #F0FFF0; padding: 10px; border: 1px solid green">
+```{r}
+set.seed(584)
+TestIndex <- sample(nrow(Heart), size = 0.20 * nrow(Heart), replace = FALSE)
+Test <- Heart[TestIndex, ]
+Train <- Heart[-TestIndex, ]
+```
+
+
+```{r}
+Heart.rpart <- rpart(AHD ~ ., data = Train)
+```
+
+```{r fig.height = 8, fig.width = 9}
+plot(as.party(Heart.rpart))
+```
+
+```{r}
+AHD.rpart <- predict(Heart.rpart, newdata = Test, type = "class")
+table(AHD.rpart, Test$AHD, dnn = c("Predictions", "Actual"))
+```
+
+```{r}
+Heart.rf <- randomForest(AHD ~ ., data = Train, importance = TRUE)
+```
+
+```{r}
+varImpPlot(Heart.rf, n.var = 8, main = "Heart disease: variable importance plot", type = 2)
+```
+
+```{r}
+AHD.rf <- predict(Heart.rf, newdata = Test)
+table(AHD.rf, Test$AHD, dnn = c("Prediction", "Actual"))
+```
+
+</div></p>
+
