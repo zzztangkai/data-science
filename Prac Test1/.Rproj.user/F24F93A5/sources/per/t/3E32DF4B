@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1585032711188.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "3E32DF4B",
+    "lastKnownWriteTime" : -5051054444285671646,
+    "last_content_update" : 1585032711188,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "6D3E538E",
+        "caption" : "USCrime",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=USCrime&cache_key=6D3E538E",
+        "displayedObservations" : 1250,
+        "environment" : "",
+        "expression" : "USCrime",
+        "object" : "USCrime",
+        "preview" : 0,
+        "totalObservations" : 1250,
+        "variables" : 15
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

@@ -1,0 +1,1 @@
+"0","matplot(rownames(Tenyeargun),Tenyeargun, type = ""l"", lty = 1, lwd=1,  xlab = ""Year"", ylab = ""Gun Each runner"", main="" Each runner gun over 10 years"")"

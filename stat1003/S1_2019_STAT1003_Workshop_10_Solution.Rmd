@@ -1,0 +1,194 @@
+---
+title: "STAT1003"
+author: "**Introduction to Data Science**"
+date: "Solution: Workshop 10"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+  html_notebook:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+  word_document:
+    highlight: haddock
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, message=FALSE, tidy=TRUE, error=FALSE, warning=FALSE)
+```
+
+In this week's workshop, we'll be using two very different methods for classification: logistic regression, which you can think of as an extension of linear regression for a categorical response variable, and $K$-nearest neighbours, which is a nonparametric method for classification that can be easily extended to more than two classes.
+
+The data set we'll be using contains measurements of various measurements related to cardiac health of almost 300 individuals, roughly half of whom have heart disease; the other half do not have any cardiac-related conditions. The variable that we'll be trying to predict is `AHD`, which is a two-class (`Yes`/`No`) categorical variable.
+
+```{r}
+## Load the dataset here
+print(load("S1_2019_STAT1003_Workshop_10.RData"))
+##
+```
+
+
+# Data
+
+For the exploratory analysis, use the dataset `Heart`.
+
+1. What is the structure of the data set? What functions would you use to understand the structure?
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+There's are lots of ways of getting a handle on the structure of a dataset, but as we've seen before, the functions `describe()` and `plot(describe())` from the library `Hmisc` are quite useful.
+
+```{r}
+require(Hmisc)
+describe(Heart)
+plot(describe(Heart))
+```
+
+As you can see, aside from the response `AHD`, which is categorical (`Yes/No`) there's a mixture of categorical and continuous potential explanatory variables. Consequently, a variety of plots will be required to explore the relationship between `AHD` and these explanatory variables.
+</div></p>
+
+
+2. What kinds of plots might you use to assess the relationship between `AHD` and the other variables?
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+Here are two plots, one for a continuous variable, and the other, for a categorical variable.
+
+```{r}
+boxplot(Age ~ AHD, data = Heart)
+```
+
+```{r}
+mosaicplot(AHD ~ Thal, data = Heart, col = 4:2,
+           ylab = "Thallium stress test", main = "Heart disease")
+```
+
+The boxplot is straightforward to interpret: people with heart disease tend to be older than those without heart disease. The second plot is a mosaic plot, which is useful for examining the relationship between two categorical variables. Here, we can see that more people without heart disease have a 'normal' thallium stress test compared to those with heart disease; in addition, a greater proportion of people with heart disease have a 'reversible' stress test than those who don't.
+</div></p>
+
+# Logistic Regression
+
+You are going to try to predict the presence or absence of heart disease using a subset of the explanatory variables
+
+1. Using the function `glm` and then `step`, fit a logistic regression model for the variable `AHD` using forward stepwise regression. Output a summary. Which variables have been chosen?
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+The steps required here are similar to those for linear regression, but because the response has a binomial distribution, we have to specify that explicitly when fitting logistic regression. Recall that we're modelling the probability $p$ that an individual has heart disease as follows:
+$$
+\log\left( \frac{p}{1-p} \right) = \beta_0 + \beta_1x_1 +\ldots + \beta_p x_p
+$$
+```{r}
+# Use Train and Test
+
+# First, fit a model with the intercept term only
+Heart.0 <- glm(AHD ~ 1, data = Train, family = binomial)
+
+# Next, fit a model with all the variables so we can extract its formula for the stepwise command
+Heart.all <- glm(AHD ~ ., data = Train, family = binomial)
+
+# Use the step() function to construct a foward stepwise regression; trace = 0 suppresses intermediate output
+Heart.fwd <- step(Heart.0, scope = formula(Heart.all), direction = "forward", trace = 0)
+```
+
+```{r}
+summary(Heart.fwd)
+```
+
+Nine variables have been chosen, but some of them have more than two levels, so when they are encoded using 'dummy' variables, the total number of variables is greater than nine.
+
+</div></p>
+
+2. Once you have constructed the model, obtain predicted probabilities for the test set, and then convert those probabilities into class labels using some cutoff. 
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+
+To get predicted probabilities, calculated as
+$$
+\hat{p} = \frac{e^{\hat{\beta}_0 + \hat{\beta_1}x_1 +\ldots + \hat{\beta}_p x_p}}{1 + e^{\hat{\beta}_0 + \hat{\beta}_1x_1 +\ldots + \hat{\beta}_p x_p}}
+$$
+we use the function `predict()` just as we did for linear regression, but it requires an additional argument to ensure that we get probabilities.
+
+```{r}
+Heart.predprob <- predict(Heart.fwd, newdata = Test, type = "response")
+head(Heart.predprob)
+```
+
+We need to convert these predicted probabilities to class labels based on a cutoff, and here's an easy way to do so using the function `ifelse`: we create a vector that contains `Yes` when the predicted probability is above the cutoff, and 'No' when it is below.
+
+```{r}
+Heart.predclass <- ifelse(Heart.predprob > 0.5, "Yes", "No")
+head(Heart.predclass)
+```
+
+</div></p>
+
+3. Using the class labels you generated, obtain a confusion matrix, and calculate what fraction of up/down results you got right in the test set. How did the model perform?
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+
+By convention, predictions are along rows, and actual values down the columns of a confusion matrix:
+
+```{r}
+table(Heart.predclass, Test$AHD, dnn = c("Predicted", "Actual"))
+```
+
+The sensitivity (true positive fraction) is 6/(25 + 6) = `r round(6/31, 2)` and the specificity (true negative fraction) is 25(25 + 4) = ` r round(25/29, 2)`.
+</div></p>
+
+4. Construct an ROC curve using the functions `prediction` and `performance` from the library `ROCR`. (If the library is not available on your computer, you will have to install it and then make it available in your session.) Add colour so that the probability cutoff is visible on the ROC curve.
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+
+You may need to install the library ROCR onto the computer you're using and then make it available to your R session. The commands to produce a coloured ROC curve are not particularly transparent, but the following code will allow you to do so. Note that the vertical axis plots the sensitivity, whereas the horizontal axis plots (1 - specificity), which is the false positive fraction.
+
+```{r}
+require(ROCR)
+pred <- prediction(Heart.predprob, Test$AHD, label.ordering = levels(Test$AHD))
+perf <- performance(pred, "tpr", "fpr")
+par(pty = "s")
+plot(perf, colorize = TRUE)
+abline(0, 1)
+```
+
+</div></p>
+
+# $K$-Nearest Neighbours
+
+Here, we'll compare how $K$-nearest neighbours fares against logistic regression. You will need to use the function `knn` from the library `class`. As we will discuss during the workshop, you will have to use the matrices `kTrain` and `kTest` as input to the function `knn` as well as the values of `AHD` from the training set `Train` and test set `Test`.
+
+1. Install the library `class` and then load it into your *R* session.
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+```{r}
+require(class)
+```
+
+</div></p>
+
+2. See the help file for `knn` and see if you can understand how to use it - in other words, what the correct syntax of the command should be.
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+To use K-nearest neighbours, we're going to use the variables we selected using forward stepwise regression - this may not necessarily be the best chose, but this might be one way of carrying out 'feature selection'. Furthermore, because of the categorical variables that will be used, we need to convert their levels to dummy coding, a pattern of ones and zeros (e.g., zero for females and one for males). For this reason, we'll be using the training and testing sets `kTrain` and `kTest`, respectively.
+
+The syntax is straightforwared:
+
+```{r}
+# 10 nearest neighbours
+knnpred10 <- knn(kTrain, kTest, Train$AHD, k = 10)
+head(knnpred10)
+```
+
+</div></p>
+
+3. For different values of $K$, say from 1 to 15, obtain predictions of `AHD`. Display confusion matrices, and calculate the overall success rate. Which value of $K$ would you use?
+
+<p><div class="boxed"><div style="background-color: #F0F8FF; padding: 10px; border: 1px solid black">
+
+For $k = 10$ nearest neighbours, the confusion matrix is
+
+```{r}
+table(knnpred10, Test$AHD)
+```
+and we can see that in this instance, the sensitivity and specificity are quite low compared to results from forward stepwise regression. The optimum occurs at around $k = 14$, but the classifier is not as good as a logistic regression model using these variables.
+
+</div></p>

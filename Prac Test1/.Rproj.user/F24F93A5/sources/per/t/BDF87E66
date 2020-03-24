@@ -1,0 +1,33 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1585031293661.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "BDF87E66",
+    "lastKnownWriteTime" : 8316288284647760441,
+    "last_content_update" : 1585031293661,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "400BB0D9",
+        "caption" : "Cherry",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=Cherry&cache_key=400BB0D9",
+        "displayedObservations" : 41248,
+        "environment" : "",
+        "expression" : "Cherry",
+        "object" : "Cherry",
+        "preview" : 0,
+        "totalObservations" : 41248,
+        "variables" : 8
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

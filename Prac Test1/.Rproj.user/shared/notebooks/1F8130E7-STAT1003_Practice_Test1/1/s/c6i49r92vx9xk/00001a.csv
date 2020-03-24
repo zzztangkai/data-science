@@ -1,0 +1,3 @@
+"0","Sex10 <- tapply(Tenyear$sex, Tenyear$name.yob, unique)"
+"0","SexColor <- sapply(Sex10, function(x) (if (x==""M"") ""blue"" else ""magenta""))"
+"0","matplot(rownames(Tenyeargun),Tenyeargun, type = ""l"", lty = 1, lwd=1, col = SexColor, xlab = ""Year"", ylab = ""Gun Each runner"", main="" Each runner gun over 10 years"")"

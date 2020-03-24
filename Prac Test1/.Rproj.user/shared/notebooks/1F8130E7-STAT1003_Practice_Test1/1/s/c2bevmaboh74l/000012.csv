@@ -1,0 +1,3 @@
+"0","#"
+"0","indrun <- table(tapply(Cherry$nruns, Cherry$name.yob, unique))"
+"0",""

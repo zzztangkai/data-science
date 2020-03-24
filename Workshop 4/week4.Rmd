@@ -3,6 +3,7 @@ library(gapminder)
 ```
 #1. Construct a plot of the average life expectancy over the last four years in each country against its average GDP per capita over that same time period, and label it appropriately.
 ```{r}
+<<<<<<< HEAD
 #Average of last 4 year of Life expectancy
 LastFourYearLifeExp <- LifeExp[9:12,]
 
@@ -17,5 +18,46 @@ LastFourYearGDP <- OnlyGDP[9:12, 1:142]
 AverageGDP <- colMeans(LastFourYearGDP)
 
 plot(x=LastFourYearGDP, y=LastFourYearLifeExp, type="p", log = "x", xlab = "GDP", ylab = "LifeExp")
+=======
+le <- gapminder$lifeExp
+le <- matrix(le,nrow=12, byrow = FALSE)
+le <- le[9:12,]
+avgle4 <- colMeans(le)
+
+gdp <- gapminder$gdpPercap
+gdp <- matrix(gdp, nrow=12, byrow = FALSE)
+gdp <- gdp[9:12,]
+avggdp4 <- colMeans(gdp)
+plot(avggdp4, avgle4, xlab="GDP per capita", ylab = "Life expectancy")
+```
+
+
+
+#2. What do you notice about the scale of GDP? Transform it appropriately and re-plot.
+```{r}
+plot(avggdp4, avgle4, xlab="GDP per capita", ylab = "Life expectancy", log = "x")
+```
+
+#3. Use different symbols for countries in different continents. Hint: you will need the arguments pch. so see the help file for plot. First create a vector that gives you the continent that each country is in.
+```{r}
+#gapminder$continent[!duplicated(gapminder$country)]
+#or
+Continent <- gapminder$continent[!duplicated(gapminder$country)]
+
+plot(avggdp4, avgle4, xlab="GDP per capita", ylab = "Life expectancy",log="x", pch=as.numeric(Continent))
+```
+
+#4. Add a legend so that we know which symbol corresponds to which continent.
+```{r}
+plot(avggdp4, avgle4, xlab="GDP per capita", ylab = "Life expectancy",log="x", pch=as.numeric(Continent))
+legend("bottomright", legend=sort(unique(Continent)), pch = 1:5)
+```
+
+
+#5. Construct a plot similar to Q4, but this time use the same symbol but different colours for eachcontinent.
+```{r}
+plot(avggdp4, avgle4, xlab="GDP per capita", ylab = "Life expectancy",log="x",  col=as.numeric(Continent))
+legend("bottomright", legend=sort(unique(Continent)),col =1:5 , pch=1)
+>>>>>>> 283b93622c3306a2ac1af70de200df7b41cb06cf
 ```
 
