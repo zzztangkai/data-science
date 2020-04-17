@@ -1,0 +1,183 @@
+---
+title: "STAT1003"
+author: '**Introduction to Data Science**'
+date: "Solution: Workshop 6"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+  html_notebook:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+  word_document: 
+    highlight: tango
+    toc: yes
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, message=FALSE, tidy=TRUE, error=TRUE)
+```
+
+
+# Exploring the IMDB Dataset
+
+In last week's workshop, we imported two movie datasets, one containing ratings, the other containing financial information, e.g, budget, and domestic and worldwide receipts, and then merged them together to create a single dataset. The merging was done on movie title and on release year. 
+
+In the first part of this workshop, you will be exploring the dataset by producing graphical summaries. Keep in mind that there is not one 'correct' way to carry out exploratory data analysis (EDA). It is up to you to decide what summaries to produce, and how to visualize the data and the relationships among the variables. The steps below are just small sample of the kinds of things you might want to explore. As you carry them out, think of other summaries or visualizations you might want to carry out.
+
+1. Load the data file `AllData.RData` and re-familiarize yourself with the structure of the data frame and the variables in it.
+
+```{r}
+print(load("AllData.RData"))
+```
+
+2. Note that there are two columns with budget information. what are the characteristics of those columns? Do they give the same information? What plot could you construct to determine whether they do?
+
+The variables `Budget` and `budget` (case matters in *R*!) come from the two datasets that we merged in order to form `AllData`. As you can see from the summaries, `budget` gives us the actual dollar amounts, whereas `Budget` is in units of millions of dollars. Furthermore, one has more missing values than the other, and it's of interest to know if they give the same information. There are lots of ways of doing this, but one visual way is to plot the two variables on a scatterplot. If they give exactly the same information, all the points (those that aren't missing) should lie on a straight line.
+
+```{r}
+par(pty = "s") # square plot
+plot(Budget ~ I(budget/10^6), data = AllData, xlab = "budget/1M") # I've divided budget by a million
+abline(0, 1)
+```
+
+3. what should we do about movies with very small or zero domestic or worlwide gross receipts?
+
+Again, we'd want to find out whether these were real figures (can a movie really not make any money?) or just data that was unavailable at the time that the datasets were put together.
+
+
+4. Produce the following plots, and a couple of others that you think might be useful:
+    a. side-by-side boxplots of domestic receipts for the different movie genres
+    b. a plot of the domestic against worldwide receipts
+    c. a plot of the domestic against the *difference* between worldwide and domestic receipts
+    d. ... a couple of others that you have thought of
+  
+As we've discussed in lectures, exploratory analysis is about you getting to know the data, so there are no hard and fast rules here. Becoming familiar with the data is an iterative process; you plot something, and that immediately suggests something else, and so on.
+
+```{r fig.width = 9}
+# Side-by-side boxplot of domestic receipts for different genres
+require(RColorBrewer)
+mypalette <- brewer.pal(7, "PuRd") # this is fancy, you don't need to do it
+boxplot(AllData$DomesticGross[AllData$Action == 1],
+        AllData$DomesticGross[AllData$Animation == 1],
+        AllData$DomesticGross[AllData$Comedy == 1], 
+        AllData$DomesticGross[AllData$Drama == 1], 
+        AllData$DomesticGross[AllData$Documentary == 1],
+        AllData$DomesticGross[AllData$Romance == 1], 
+        names = colnames(AllData)[18:23],
+        ylab = "Gross domestic receipts",
+        col = mypalette[2:7])
+```
+
+As you can see in the plot above, the outlying observations swamp what's going on here. We could, of course plot the logarithm of gross receipts, but what about those zero values? One option is to add a small positive value to all figures, and then plot the logarithm:
+```{r}
+DomesticGross <- AllData$DomesticGross + 0.1 # just to make life easier
+require(RColorBrewer)
+mypalette <- brewer.pal(7, "PuRd") # this is fancy, you don't need to do it
+boxplot(DomesticGross[AllData$Action == 1],
+        DomesticGross[AllData$Animation == 1],
+        DomesticGross[AllData$Comedy == 1], 
+        DomesticGross[AllData$Drama == 1], 
+        DomesticGross[AllData$Documentary == 1],
+        DomesticGross[AllData$Romance == 1], 
+        names = colnames(AllData)[18:23],
+        ylab = "Gross domestic receipts",
+        log = "y",
+        col = mypalette[2:7])
+```
+
+Although the plot is now distorted by the small value we added, we do get a better view of the data from the first to the third quartile.
+
+```{r}
+# plot of domestic against worldwide receipts
+# plot(WorldwideGross ~ DomesticGross, data = AllData) # simple plot
+plot(WorldwideGross ~ DomesticGross, data = AllData, col = rgb(1, 0, 0, alpha = 0.3), pch = 16,
+     xlab = "Domestic gross (millions of USD)", ylab = "Worldwide gross (millions of USD)")
+```
+
+Let's try both on the log scale since the outlier (*Titanic*) tends to distort the plot:
+
+```{r}
+# plot of domestic against worldwide receipts
+# plot(I(WorldwideGross + 0.1) ~ I(DomesticGross + 0.1), data = AllData, log = "xy") # simple plot
+plot(I(WorldwideGross + 0.1) ~ I(DomesticGross + 0.1), data = AllData, col = rgb(1, 0, 0, alpha = 0.3), pch = 16,
+     xlab = "Domestic gross (millions of USD)", ylab = "Worldwide gross (millions of USD)", log = "xy")
+```
+
+That very straight line of points should make us suspicious that something isn't quite right - maybe worldwide receipts *include* domestic receipts? So let's plot the domestic receipts against the *difference* between worldwide and domestic receipts (of course, what if we get negative differences?).
+
+```{r}
+plot(DomesticGross ~ I(WorldwideGross - DomesticGross), data = AllData, col = rgb(1, 0, 0, alpha = 0.3), pch = 16)
+```
+
+Here, we can more see a more sensible relationship between domestic receipts and (presumably) receipts outside the US. We could now try log transformations, but we would have to account for zero values, and some negative values as well.
+
+**What other plots might you suggest?**
+
+# Linear regression
+
+In this section, we're going to fit a simple linear model to some house price data for the years 2006 - 2010 from the city of Ames, IA. First, however, we need to read the data in and then do a bit of wrangling.
+
+1. Using an appropriate function, read the data in the file `ames.csv`.
+
+Like all *R* functions, `read.csv` takes lots of arguments, and some of their values will depend on the structure of the file you're trying to read in. So, you often need to take a look at the file first so you know what to expect. This one, however, is pretty straightforward.
+```{r}
+Ames <- read.csv("ames.csv")
+```
+
+2. What's it's structure? Can you tell from the variable names what they are?
+
+```{r}
+dim(Ames)
+```
+
+This data frame has 82 variables, so I won't display the entire summary here. However, keep in mind the functions we used for the IMDB data above: `summary`, `str`, `describe`, and `plot(describe(Ames))`. Having lots of variables means that the output of summary functions can get pretty messy.
+
+3. Create a new data frame that contains only those houses for which `Gr.Liv.Area` is less than $1500 and the variable `SalePrice` is less than USD300000.
+
+Remember that you can use comparision operators to generate a vector of `TRUE` and `FALSE` that you can then use to select the rows of a data frame. There are lots of ways to answer this question, but here's one. Make sure you understand it. How would you do this using the `subset()` command?
+
+```{r}
+sAmes <- Ames[Ames$Gr.Liv.Area < 1500 & Ames$SalePrice < 300000, ]
+```
+
+4. Create a new variable (`Total.Liv.Area`) that is the sum of the variables `Gr.Liv.Area` and `Total.Bsmt.SF` and add it to the data frame you created in 3.
+
+```{r}
+Total.Liv.Area <- sAmes$Gr.Liv.Area + sAmes$Total.Bsmt.SF
+```
+
+5. Now construct a plot of `SalePrice` against `Total.Liv.Area`. Our objective is going to be to predict the sale price from a knowledge of the square footage of a house.
+
+```{r}
+# First, let's add the new column to the subsetted data frame:
+sAmes <- cbind(sAmes, Total.Liv.Area)
+
+# Now let's produce a plot of SalePrice against Total.Liv.Area
+
+# define a new transparent colour - you don't have to do this
+TransparentRed <- rgb(176/255, 23/255, 31/255, 0.5)
+
+# Now produce the plot; note that I've divided the sale price by 1000 so the numbers
+# are between zero and 300 - it makes the y-axis easier to read.
+# Also, the default plotting symbol is an open circle; I want a filled circle,
+# so I'm going to use the argument pch = 16, which gives me a Plotting CHaracter that
+# is a filled circle
+plot(SalePrice/1000 ~ Total.Liv.Area, data = sAmes, 
+     xlab = "total living area (square feet)", 
+     ylab = "price (thousands of dollars)",
+     pch = 16, col = TransparentRed)
+```
+
+
+## Additional questions
+
+6. First, let's divide the dataset into to parts: a training set that we're going to use to construct the model, and a test set that we'll use to check how well the model fits. Set aside about 20% of the data for the test set.
+
+7. Plot the two variables using the training set only.
+
+8. Construct a linear model relating `Saleprice` to `Total.Liv.Area`. Replot the data and then plot the least squares line of best fit. Comment.
+
+9. Predict the sale prices of the houses in the test set. What plot could you construct that will give you a visual illustration of how well your model did?

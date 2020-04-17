@@ -1,0 +1,383 @@
+---
+title: "STAT1003"
+author: '**Introduction to Data Science**'
+date: "Workshop 1"
+output:
+  html_document:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+    toc: yes
+  html_notebook:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+  word_document: 
+    highlight: tango
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, message=FALSE, tidy=TRUE, error=FALSE, eval=FALSE)
+```
+
+
+# Introduction
+_R_ is an extremely powerful environment for carrying out statistical analysis. You can use it for simple purposes or for very complex ones, as a big, overgrown calculator, or as a tool for the sophisticated display and analysis of large and complex datasets. In this introductory tutorial, you'll learn some of the basics of _R_. See the next section for links to additional resources on using _R_.
+
+There are many interfaces to _R_, but the one we'll be using is called _RStudio_. It is not a graphical user interface (GUI) that allows you to do statistical analysis through pull-down menus, but it does provide lots of useful features to make your life easier when using _R_. It is a free, open source R integrated development environment. It provides a built in editor, works on all platforms (including on servers) and provides many advantages such as integration with version control and project management. So let's get started!
+
+# Install _R_ and _RStudio_ (Optional)
+The computers in the tutorial rooms will have _R_ and _RStudio_ on them, but you can also freely install them on your personal computer or laptop. Download _R_ from the [Comprehensive R Archive Network](https://cran.curtin.edu.au) (CRAN) and _RStudio_ from its [website](https://www.rstudio.com/products/rstudio/download/). Install them (_R_ first and then _RStudio_) using the default options. 
+
+# Before you start
+Before you begin, it's important to create a working directory. This is where you'll be storing data files that you'll be downloading from Blackboard so that you can analyse them during workshops. When you log on to a Curtin computer, you will have access to your own network drive, which on Windows computers is given the letter designation `I:\`, or, in words, `I-drive`. Navigate to this drive, and create a folder called `STAT1003`. It is in this folder that you'll be storing the files you need when you download them from Blackboard.
+
+# Getting Started with _RStudio_
+When you first start _RStudio_, you should see a window like the one below:
+
+![RStudio window](https://swcarpentry.github.io/r-novice-gapminder/fig/01-rstudio.png)
+
+Within _RStudio_, you'll be greeted by three panels:
+
+- The interactive _R_ console
+- Environment/History (tabbed in upper right)
+- Files/Plots/Packages/Help/Viewer (tabbed in lower right)
+
+The left hand pane is the **console** where you type in commands and see the output. The **Workspace** tab in the top right window shows all the active objects in your current workspace. The **History** tab shows a list of the commands that you have typed in so far. The bottom right window has a number of tabs, the first of which is the **Files** tab that shows you all the files and folders in your default workspace. Any plots that you produce will show up in the **Plots** tab, and the **Help** tab contains help on _R_ commands.
+
+**We're going to be using *RStudio* in 'notebook' mode a little later in this workshop.** 
+
+Once you open files, such as R scripts or an R Markdown file, an editor panel will also open in the top left.
+
+![RStudio window with script window open](https://swcarpentry.github.io/r-novice-gapminder/fig/01-rstudio-script.png)
+
+## Work flow within _RStudio_
+
+There are two main ways that you can work within RStudio.
+
+1. Test out codes and commands and play within the interactive _R_ cosole and then copy code into an `.Rmd` (R Markdown) or `.R` (_R_ script) file to run later
+
+    - This works well when doing small tests and/or starting off
+    - Can quickly become laborious
+
+2. Start writing in an `.Rmd` or `.R` file and use _RStudio_’s short cut keys for the `Run` command to push the current line, selected lines or modified lines to the interactive R console.   
+
+    - Good way to start; all your code is saved for later
+    - You'll be able to run the file you create from within _RStudio_ 
+    
+## Creating a project folder
+
+It's often handy and tidy to keep all your files associated with a particular task - this unit, for example - in the same directory or subdirectory. In _RStudio_ one way to do this is to create a 'project' for every task. Click on the 'Project' icon in the top right hand corner, and follow the menu items 'Project -> New Project -> Existing Directory'. Using the 'Browse' button, select the directory you just created (`STAT1003`) in your `I-drive`, and click on 'Create Project'.
+
+**Now, the next time you sit at the computer, you can open up RStudio and get access to the folder `I:\STAT1003` in one of two ways, either by:**
+
+1. **double-clicking on the `STAT1003.Rproj` file when you've got Windows Explorer open and showing that file, or**
+2. **navigating to the file `STAT1003.Rproj` in _RStudio_ when you've got it open by using the menu sequence 'File -> Open Project'.**
+
+# Reproducible Analyses
+
+Up to now, you may have been using *R* within *RStudio* by simply typing commands into the console, as in the figure below, and then producing the output. 
+
+That's perfectly fine when you are quickly testing out code, or carrying out analyses that you don't necessarily want to keep or reproduce in the future. However, if you're carrying out a reasonably complex analysis that you want to document - for yourself or for others - then it makes sense to work in a way that allows you to combine your description of the analysis you're carrying out, the *R* code that you're writing, *and* the output of that code. 
+
+This section introduces your to **R Markdown**, a simple formatting syntax for writing integrated HTML, PDF, and MS Word documents from the same source file, known as an R Markdown (.Rmd) file. This worksheet, for example, has been produced using R Markdown.
+
+In this unit, you will be doing all analyses - workshops, tests, and the project - using R Markdown. It is easy to learn, and you'll appreciate begin able to go back to something you've done a few weeks later and actually understand it. 
+
+Here are some advantages of using R Markdown ([van Rij](http://www.jacolienvanrij.com/Tutorials/tutorialMarkdown.html)):
+
+1. R code can be embedded in the document, so it is not necessary to keep the output and R script separately. Including the R code directly in a report provides structure to analyses.
+
+2. The report text is written as normal text, so no knowledge of HTML coding is required.
+
+3. The output is an HTML file that includes pictures, code blocks, R output, and text. No additional files are needed, everything is incorporated in the HTML file. If you want a publication-quality document, you can produce an MS Word document or a PDF file.
+
+4. Integrated reports and documents enhance collaboration: It is easier to comment on an analysis when the R code, the R output, and the plots are available in the report.
+
+The instructions below provide only a skeleton introduction. We will be learning about other aspects during this and subsequent workshops. For video tutorials on Rmarkdown, see the [RStudio website](http://rmarkdown.rstudio.com/lesson-1.html); you can also find [R Markdown cheatsheets](http://rmarkdown.rstudio.com/lesson-15.html) there, or from the help menu (`Help -> Cheatsheets`). For a quick reference that will pop up in an RStudio window, see `Help -> Markdown Quick Reference`.
+
+## Starting a new R Markdown file (R Notebook mode)
+
+We'll be using a special mode known as an R notebook, which is an interactive version of an R Markdown file. In most instances, you will be starting with a pre-existing file containing workshop questions, but you can create a new notebook in RStudio with the menu command ` File -> New File -> R Notebook`.
+
+Once the file is open, you can start typing text below the header 
+
+<pre class="yaml"><code>---
+title: &quot;My Notebook&quot;
+output: html_notebook
+---</code></pre>
+
+## Inserting R code in 'chunks'
+Notebook chunks can be inserted quickly using the keyboard shortcut `Ctrl+Alt+I`, or via the `Add Chunk` command in the editor toolbar. Once you have a blank chunk, you can type one or several R commands, and then execute them by clicking on the green triangle (`Run Chunk`), or via the keyboard shortcut `Ctrl+Shift+Enter`. The output will appear below the command. R code that produces a figure is entered and executed in exactly the same way. See below.
+
+![Chunk input and output with figure](https://d33wubrfki0l68.cloudfront.net/0b0d6667ad450fca127b308a6948cf371e84d658/7b987/images/notebook-demo.png)
+
+There are many ways of working using an R Notebook, but if you execute a series of chunks sequentially without error, you can then go on to produce, for example, an MS Word document:first, run all the chunks using the `Run All` command from the menu, and then 'knit' it to a Word document using the menu.
+
+There is much more to be said, of course, and we will learn other aspects of R Markdown throughout the semester. For additional assistance, see the help resources above.
+
+# Introduction to _R_
+
+## Using _R_ as a calculator
+
+You can use _R_ as a simple calculator. At the prompt ('>') in the console, type in
+
+```{r Chunk1}
+10 + 2
+```
+
+followed by 'Enter' to see the result. Now type in 
+
+```{r Chunk1a}
+10 + 2 * 3 + (10 + 2) * 3 - 5^4/2
+```
+
+The precedence of operators in _R_ is the same as what you'd learn in an algebra course or on your calculator. Work out the above expression by hand to make sure you understand.
+
+_R_ contains lots of functions, and many of them have names that you would expect:
+
+```{r Chunk2}
+exp(1) - log(1) - log10(10) + sqrt(5)
+```
+
+Functions enclose their arguments inside left '(' and right parentheses ')', and we'll see later that many functions can have several named arguments. Don’t worry about trying to remember every function in _R_. You can simply look them up on Google, or if you can remember the start of the function’s name, use the tab completion in RStudio.
+
+This is one advantage that an IDE like _RStudio_ has over using _R_ on its own, it has auto-completion abilities that allow you to more easily look up functions, their arguments, and the values that they take.
+
+Typing a ? before the name of a command will open the help page for that command. As well as providing a detailed description of the command and how it works, scrolling to the bottom of the help page will usually show a collection of code examples which illustrate command usage.
+
+> ## Exercises
+> Use the console to calculate the following:
+
+>1. $(\frac{2}{3} \times 8 - 1)^{2/3}$
+>2. $\log_2(4096)$
+>3. $e^{2 + \cos(\pi/2)}$
+>4. $(2.3^2 + 5.4^2 - 2\times 2.3\times 5.4\cos(\pi/8))^{1/2}$
+
+## Comparing things
+
+We can also do comparisons in _R_:
+
+```{r}
+1 == 1 # equality (note two equals signs, read as "is equal to")
+```
+The text after this line of code is called a ''comment''. Anything that follows after the hash (or octothorpe) symbol `#` is ignored by _R_ when it executes code.
+
+```{r}
+1 != 2  # inequality (read as "is not equal to")
+```
+
+```{r}
+1 < 2  # less than
+```
+
+```{r}
+1 <= 1  # less than or equal to
+```
+
+```{r}
+1 > 0  # greater than
+```
+
+```{r}
+1 >= -9 # greater than or equal to
+```
+
+>**Caution: Comparing numbers**
+>A word of warning about comparing numbers: you should never use `==` to compare two numbers unless they are integers (a data type which can specifically represent only whole numbers). Computers may only represent decimal numbers with a certain degree of precision, so two numbers which look the same when printed out by `R`, may actually have different underlying representations and therefore be different by a small margin of error (called Machine numeric tolerance).  Instead you should use the `all.equal` function.
+
+## Assignment to Variables
+
+If we want to store the results of calculations, we can assign numbers to variables and then re-use them, as follows:
+```{r Chunk1c}
+A <- 10; B <- 2
+C <- A/B
+C
+```
+The assignment character is `<-`, and it can be constructed by using two separate keystrokes (`<` and `-`), or in _RStudio_, just type `Alt-` (the `Alt` key and the minus sign `-` together). Variable names are case-sensitive, so `Name`, `name`, and `NAME` can all be different variables. If you want to write two or more _R_ commands on the same line of the console, separate them by a semi-colon (`;`).
+
+Look for the `Environment` tab in one of the panes of _RStudio_, and you will see that these variables have appeared. 
+
+Notice that assignment values can contain the variable being assigned to. For example:
+
+```{r}
+A <- A + 1 # notice how RStudio updates its description of A in the Environment tab
+```
+
+The right hand side of the assignment can be any valid _R_ expression. The right hand side is fully evaluated before the assignment occurs.
+
+Variable names can contain letters, numbers, underscores and periods (full-stops). They cannot start with a number nor contain spaces at all. Different people use different conventions for long variable names, these include:
+
+- periods.between.words
+- underscores_between_words
+- camelCaseToSeparateWords
+
+What you use is up to you, but be **consistent**.
+
+> ## Exercises
+>1. Which of the following are valid _R_ variable names?
+
+```{r eval=FALSE}
+min_height
+max.height
+_age
+.mass
+MaxLength
+min-length
+2widths
+celsius2kelvin
+```
+
+## Vectors
+In addition to the scalars quantities that we've worked with so far, we can also work with more complex objects such as vectors and matrices. _R_ has many different *data structure*, and vectors and matrices are just two of them.
+
+Vectors consist of an ordered collection of numbers and can be created in many ways. One ways is to use the function `c()` to **c**ombine numbers into a vector. For example,
+```{r}
+x <- c(0, pi/4, pi/2, 3*pi/4, pi, 5*pi/4, 3*pi/2, 7*pi/4, 2*pi); x
+```
+creates a vector containing the elements $(0, \pi/4, \pi/2, 3\pi/4, \pi, 5\pi/4, 3\pi/2, 7\pi/4, 2\pi)$. We saw above that functions can take scalar arguments, but they can also take vector arguments, and the function will operate on each element of the vector, as follows:
+```{r}
+y <- sin(x); y
+```
+Another way is to use the operator `:`, which creates a sequence of value each one of which is larger than the previous one:
+```{r}
+z <- 1:10; z
+```
+We can also select a subset of the elements of a vector by using the indexing operator `[]`. So, using the vector `x` above, let's select the first three elements in two possible ways:
+```{r}
+x[1:3]
+x[c(1, 2, 3)]
+```
+
+>## Exercises
+>Use the console to do the following:
+>
+>1. Select the 2nd and 6th elements of `x`
+>2. Construct a vector that has all but the first element of `y`
+
+## Data types
+
+Without trying out the following command in the console, what do you think it yields? Why?
+```{r eval=FALSE}
+2 + "black"
+```
+
+If you guessed that the last command would return an error, you're right - and you already have some intuition for an important concept in programming called *data types*. In _R_, we can ask what type something is by using the function `typeof`:
+
+```{r}
+typeof(3.14)
+```
+
+```{r}
+typeof(1L) # the L suffix forces the number to be an integer, since by default R uses float numbers
+```
+
+```{r}
+typeof(5 + 4i)
+```
+
+```{r}
+typeof(c(TRUE, FALSE))
+```
+
+```{r}
+typeof("black")
+```
+
+No matter how complicated our analyses become, all data in *R* is interpreted as one of these basic data types.
+
+## Simple Plots
+_R_ has extensive graphics capabilities that can be a bit daunting at first, but if you start with simple plots and then extend them, it's a little bit less intimidating. Here's a simple plot, using the function `plot()`:
+
+```{r}
+plot(x, y)
+```
+
+The default is just points, but let's draw **b**oth points and lines:
+
+```{r}
+plot(x, y, type = "b")
+```
+
+We can also add a title, some colour, and informative labels:
+
+```{r}
+plot(x, y, type = "b", xlab = "time(hours)", ylab = "scaled temperature difference", 
+     main = "Temperature anomaly", col = "blue")
+```
+
+By contrast with simple functions such as `sin`, `cos`, and many others, most _R_ functions take several arguments. The `plot` function takes lots and lots of arguments such as `main` and `type` that allow you to customize a graph to your heart's desire. 
+
+**Notes**
+
+1. Named arguments: Functions that have many named arguments are quite useful because if you name the arguments explicitly, you don't have to worry about the order in which you enter them into the function.
+
+2. If you're using the latest version of _RStudio_, you should notice that as you start typing commands in the console, it will show you commands that start with the letters that you have typed so far. Once you have typed in the name of a function and a left parenthesis, press the 'Tab' key to get a list of the arguments that the function takes. Finally, before moving on to the next section, type `?plot` or `help(plot)` into the console, and then take a look at the **Help** tab in the lower right window.
+
+## Importing Data Into _R_
+We could, of course, laboriously type data into a vector or matrix as we did in the small examples above, but that wouldn't be very efficient. Instead, we typically import data into _R_ from pre-existing files, for example, a text file or an Excel spreadsheet. In this example, we'll import data from a CSV (comma-separated values) file. First, we're going to download it from the web, store it onto our computers, and then import it into _R_. It's a small subset of economic data from the [Gapminder website](https://www.gapminder.org/), but we're actually going to download it from a website that offers training material on _R_. 
+```{r}
+download.file("https://raw.githubusercontent.com/swcarpentry/r-novice-gapminder/gh-pages/_episodes_rmd/data/gapminder-FiveYearData.csv", destfile = "gapminder-FiveYearData.csv") # download the data from the web
+
+gapminder <- read.csv("gapminder-FiveYearData.csv")
+```
+
+There are lots of other ways to import data into _R_. One very important way is importing data that is already in _R_'s native format. Such a file will contain the extension `.RData`, and it may contain several datasets. 
+
+>## Exercises
+>Have a look at the gapminder dataset from the Environment tab in the top right pane of _RStudio_.
+>
+> 1. How big is it, i.e., how many rows and how many columns does it have?
+> 2. What is the `class` of the object `gapminder`?
+> 3. What are the different types of variables in `gapminder`? Use the function `str` (structure) to find out.
+
+## Data frames
+Data frames are important *data structures* that are often used to store data. Briefly, data frames are useful because they can contain different data types; for example, each column (variable) of a data frame can be of a different type, as we saw in the `gapminder` data. You can extract individual variables using the `$` operator; for example, 
+
+```{r}
+z <- gapminder$lifeExp; typeof(z)
+zz <- gapminder$year; typeof(zz)
+```
+
+Extracting variables in this way can be useful if, for example, you want to plot life expectancy against the year. An alternative syntax is to use a formula object instead of specifying the variables on the `x-` and `y-`axes. In this way, we don't have to extract variables from a data frame explicitly, e.g., `plot(lifeExp ~ year, data = gapminder)`.
+
+>## Exercises
+> 1. Using the variables above, plot life expectancy against year, and add axis labels and a title.
+> 2. Use the alternative syntax with a `formula` object as the argument, instead of specifying `plot(x, y, ...)`. 
+
+_R_ has many functions for plotting in the 'base' system, but there are many add-on packages ('libraries') that contain functionality for plotting that goes far beyond what 'base' graphics can do. Two of these are `lattice` and `ggplot2`. For example, here's some code that produces a plot that plots the continents using different colours:
+
+```{r}
+library(lattice)
+xyplot(lifeExp ~ gdpPercap, data = gapminder,
+       grid = TRUE, xlab = "GDP per capita", ylab = "life expectancy (years)",
+       scales = list(x = list(log = 10, equispaced.log = FALSE)),
+       group = continent, 
+       auto.key = list(space = "right"))
+```
+
+We might, for example, want to look at how the relationship changes with time:
+```{r fig.width=10, fig.height=6}
+library(lattice)
+xyplot(lifeExp ~ gdpPercap | year, data = gapminder,
+       grid = TRUE, xlab = "GDP per capita", ylab = "life expectancy (years)",
+       scales = list(x = list(log = 10, equispaced.log = FALSE)),
+       group = continent, 
+       auto.key = list(space = "right"))
+```
+
+We'll start with 'base' graphics, but you'll quickly find that for many complex plots, it's easier to use some of these add-on libraries.
+
+# Getting help in _R_
+
+1. Help on functions in _R_/_RStudio_: `?function_name` or `help(function_name)
+2. Help on packages: `help("package-name")`
+3. If you're having trouble using a function, someone has probably asked the question on the website [Stack Overflow](https://stackoverflow.com/), and someone else has probably answered it!
+4. See also the [Comprehensive R Archive Network (CRAN)](https://cran.curtin.edu.au), where you can download _R_. There's lots of free tutorials; see also the website of the [Software Carpentry Foundation](https://software-carpentry.org/), where there is a logical sequence of online tutorials that you can go through.
+5. The textbook for this unit also contains an introduction to _R_.
+6. Help on _RStudio_: The [_RStudio_](https://www.rstudio.com/) website also has plenty of tutorials.
+
+
+**Sources:** 
+This workshop was prepared using existing material at Curtin University, as well as some additions from the [Software Carpentry Foundation](https://software-carpentry.org/).

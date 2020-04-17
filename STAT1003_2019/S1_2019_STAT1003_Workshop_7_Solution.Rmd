@@ -1,0 +1,220 @@
+---
+title: "STAT1003"
+author: '**Introduction to Data Science**'
+date: "Solution: Workshop 7"
+output:
+  html_document:
+    highlight: haddock
+    theme: flatly
+  pdf_document:
+    highlight: haddock
+    includes:
+      in_header: mystyle.sty
+  word_document:
+    highlight: haddock
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, message=FALSE, tidy=TRUE, error=FALSE)
+```
+
+# Simple Linear Regression: Ames House Price Data
+
+1. Load the file `sAmes.RData` into your R session. It contains the subsetted and then augmented Ames house price data we created in Workshop 6.
+
+```{r}
+print(load("sAmes.RData"))
+```
+
+
+2. First, let’s divide the dataset into to parts: a training set that we’re going to use to construct the model, and a test set that we’ll use to check how well the model fits. Set aside about 20% of the data for the test set.
+
+```{r}
+Index <- sample(nrow(sAmes), size = 0.8 * nrow(sAmes), replace = FALSE)
+head(Index)
+```
+
+```{r}
+sAmes.train <- sAmes[Index, ]
+sAmes.test <- sAmes[-Index, ]
+```
+
+
+3. Plot the two variables using the training set only.
+
+```{r}
+plot(SalePrice ~ Total.Liv.Area, data = sAmes.train, 
+     xlab = "Total living area (square feet)", ylab = "Sale price (USD)",
+     col = rgb(0.5, 0, 1, alpha = 0.4), pch = 16)
+```
+
+
+4. Construct a linear model relating `SalePrice` to `Total.Liv.Area`. Output a summary. Replot the data and then plot the least squares line of best fit. Comment.
+
+```{r}
+Model.lm <- lm(SalePrice ~ Total.Liv.Area, data = sAmes.train)
+summary(Model.lm)
+```
+
+```{r}
+plot(SalePrice ~ Total.Liv.Area, data = sAmes.train, 
+     xlab = "Total living area (square feet)", ylab = "Sale price (USD)",
+     col = rgb(0.5, 0, 1, alpha = 0.4), pch = 16)
+abline(Model.lm, lwd = 2)
+```
+
+5. Produce diagnostic plots, and evaluate them.  
+
+```{r}
+plot(Model.lm)
+```
+
+```{r}
+hist(Model.lm$residuals)
+```
+
+
+6. Predict the sale prices of the houses in the test set. What plot could you construct that will give you a visual illustration of how well your model did?
+
+```{r}
+SalePrice.predict <- predict(Model.lm, newdata = sAmes.test)
+head(SalePrice.predict)
+```
+
+```{r}
+par(pty = "s")
+plot(SalePrice.predict, sAmes.test$SalePrice, xlab = "Predicted sale price",
+     ylab = "Actual sale price")
+abline(0, 1)
+```
+
+```{r}
+# Calculate RMSEP
+
+RMSEP <- sqrt(sum((SalePrice.predict - sAmes.test$SalePrice)^2)/length(SalePrice.predict))
+RMSEP
+
+```
+
+
+# Multiple Linear Regression: Sales Data Set
+
+This is the data set that we will explore during the lecture. It is not as large as the Ames data set, but we're going to use it to construct a simple multiple linear regression model for predicting `Sales`.
+
+1. Using an appropriate command, read in the file `Advertising.csv`.
+
+```{r}
+Ad <- read.csv("Advertising.csv")
+```
+
+
+2. What is it's structure, and how many variables and observations does it have?
+
+```{r}
+str(Ad)
+```
+
+<span style="color:#48A43F">All the variables are quantitative variables; there are no categorical ones.<span>
+
+3. Produce a scatterplot matrix using the function `pairs`. See the help file for a slightly fancier plot that will put histograms of the variables in the diagonal and the value of the correlation coefficient in the upper triangle.
+
+<span style="color:#48A43F">See the chunk options I have used to get a slightly bigger plot than the default, and one that is square. These chunk options are **not** *R* code, so they do not go inside the chunk, where you would normally put *R* code.</span>
+
+```{r fig.height = 9, fig.width = 9}
+plot(Ad)
+```
+
+
+4. Using the commands above, split the data set into a training set and a test set. Set about 15% aside.
+
+```{r}
+Index <- sample(nrow(Ad), floor(0.15 * nrow(Ad)))
+TrainAd <- Ad[-Index, ]
+TestAd <- Ad[Index, ]
+```
+
+<span style="color:#48A43F">If you're not sure if you've done this correctly, you should check the number of rows in the test/training sets and make sure they add up to the number of rows in the original data set.</span>
+
+5. Using the training data only, construct a model for predicting `Sales` that contains only `TV`.
+
+```{r}
+plot(Sales ~ TV, data = TrainAd, xlab = "TV advertising", ylab = "Sales")
+```
+
+<span style="color:#48A43F">Always plot the data!</span>
+
+```{r}
+TV.lm <- lm(Sales ~ TV, data = TrainAd)
+```
+
+```{r}
+summary(TV.lm)
+```
+
+<span style="color:#48A43F">Make sure that you know how to interpret the summary above. If not, see the lecture notes.</span>
+
+```{r}
+plot(Sales ~ TV, data = TrainAd, xlab = "TV advertising", ylab = "Sales")
+abline(TV.lm)
+```
+
+<span style="color:#48A43F">The function `abline` is used to plot the fitted line onto a plot of the data.</span>
+
+6. Construct some diagnostic plots - you will clearly see that some of the assumptions of least squares regression have been violated.
+
+```{r}
+plot(TV.lm)
+```
+
+<span style="color:#48A43F">For now, we're only interested in the first three plots: if there's no curvature in the first plot (and there doesn't appear to be), the linear relationship between `Sales` and `TV` is appropriate (though we can see the nonconstant spread that we'll also see in plot 3); in the second, we're assessing whether the residuals are *approximately* Normally distributed (which they more or less are); in the third plot, *R* has helpfully drawn a smooth curve to the points, and it shows an upward trend, which indicates nonconstant variance. So, clearly, that assumption has been violated. There are methods to carry out least squares estimation in this situation, but we will not consider those in this unit.</span>
+
+7. Predict `Sales` in the test set, and then calculate the root mean square error of prediction.
+
+```{r}
+Sales.pred <- predict(TV.lm, newdata = TestAd)
+```
+
+```{r}
+RMSEP <-  sqrt( sum ( ( TestAd$Sales - Sales.pred)^2 )/length(Sales.pred))
+RMSEP
+```
+
+```{r}
+par(pty = "s")
+Range <- range(c(TestAd$Sales, Sales.pred))
+plot(TestAd$Sales ~ Sales.pred, xlab = "predicted sales", ylab = "actual sales", xlim = Range, ylim = Range)
+abline(0, 1)
+text(min(Range) + 1, max(Range) - 1, paste("RMSEP", round(RMSEP, 2)), adj = 0)
+```
+
+<span style="color:#48A43F">Notice that in the plot above, the scales have been forced to be identical; furthermore, the graphical parameter `par(pty = "s")` has been used to ensure that the plot is square. Finally, to make the plot more informative, the value of the RMSEP has been added using the `text` command.</span>
+
+8. Carry out steps 5. - 7., but this time, fit a model that contains `TV`, `Radio`, and their interaction (`TV:Radio`).
+
+<span style="color:#48A43F">In brief:</span>
+```{r}
+TV_Radio.lm <- lm(Sales ~ TV + Radio + TV:Radio, data = TrainAd)
+summary(TV_Radio.lm)
+```
+
+<span style="color:#48A43F">All the coefficients are significantly different from zero. The value of $R^2$ has increased, though this will always be the case when additional variables have been added. A better measure (though not infallible) is adjusted-$R^2$, which adjusts for the number of variables in the models, and this too has increased considerably.</span>
+
+```{r}
+plot(TV_Radio.lm)
+```
+
+<span style="color:#48A43F">Some of the observations in the test set, which are numbered in the diagnostic plots, appear to distort some of the diagnostic plots somewhat. There is a hint of some curvature that has not been adequately modelled, but the variance is now much more constant than it was in the simple model.</span>
+
+
+```{r}
+Sales2.pred <- predict(TV_Radio.lm, newdata = TestAd)
+RMSEP <-  sqrt( sum ( ( TestAd$Sales - Sales2.pred)^2 )/length(Sales2.pred))
+par(pty = "s")
+Range <- range(c(TestAd$Sales, Sales2.pred))
+plot(TestAd$Sales ~ Sales2.pred, xlab = "predicted sales", ylab = "actual sales", xlim = Range, ylim = Range)
+abline(0, 1)
+text(min(Range) + 1, max(Range) - 1, paste("RMSEP", round(RMSEP, 2)), adj = 0)
+```
+
+9. Which model has a smaller root mean square error of prediction?
+
+<span style="color:#48A43F">Clearly, including `Radio` and its interaction with `TV` results in a model that yields more precise and accurate predictions!.</span>

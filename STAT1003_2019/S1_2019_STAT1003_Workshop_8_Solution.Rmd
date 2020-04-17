@@ -1,0 +1,129 @@
+---
+title: "STAT1003"
+author: '**Introduction to Data Science**'
+date: "Solution: Workshop 8"
+output:
+  html_document:
+    highlight: haddock
+    theme: flatly
+  html_notebook:
+    highlight: haddock
+    number_sections: yes
+    theme: flatly
+  word_document:
+    highlight: haddock
+---
+```{r echo=FALSE}
+knitr::opts_chunk$set(prompt=FALSE, comment=NA, message=FALSE, tidy=TRUE, error=FALSE)
+```
+
+# Variable Selection: Body Fat Data
+
+
+1. Load the data file `BodyFat.RData`
+
+```{r}
+print(load("BodyFat.RData"))
+```
+
+
+2. What objects does it contain?
+
+<span style="color:#48A43F">A training set and a test set!</span>
+
+3. Construct a scatterplot matrix of the training **and** test data. Compare them and comment.
+
+<span style="color:#48A43F">Note that because there are `r ncol(TrainBodyFat1)` variables in the dataset, we need to make the scatterplot matrix a bit bigger than the default size, and we can do so by using the chunk options `fig.width` and `fig.height`. Note these are `knitr/Rmarkdown` options, not `R` code.</span>
+
+```{r fig.width=10, fig.height=10}
+# Training set
+pairs(TrainBodyFat1)
+```
+
+```{r fig.height=10, fig.width=10}
+pairs(TestBodyFat1)
+```
+
+<span style="color:#48A43F">It's a good idea to plot the **test** set as well, because we want to make sure that there aren't any outliers that might inflate prediction error. In the training set, it's clear that all of the variables are highly correlated - not surprising considering that body measurements tend to go up and down together. We can see that in the training set there are a couple of individuals who have very large ankle measurements relative to other body measurements. No such outliers appear to exist in the test set.</span>
+
+4. Remove the two obvious outliers from the training set.
+
+<span style="color:#48A43F">There are lots of ways of removing the two individuals outlined above, but a convenient way is to use the function `subset`. See the help file for more details on how to use it. The two individuals to remove have ankle measurements of greater than 30 cm, and we will use this information to keep only those individuals whose ankle measurements are less than 30 cm.</span>
+
+```{r}
+dim(TrainBodyFat1) # dimension of original training set
+```
+
+```{r}
+TrainBodyFat1 <- subset(TrainBodyFat1, Ankle < 30)
+```
+
+```{r}
+dim(TrainBodyFat1) # dimension of training set with two observations removed
+```
+
+
+5. Using the training set, construct a model with only an intercept and a model with all the variables.
+
+<span style="color:#48A43F">The reason we're going to construct the simplest model possible, and the model with the most number of variables, is so that we can use them in the simplest of all sequential selection methods, forward stepwise regression. Have a look at the lecture notes for a fuller explanation of how it works.</span>
+
+```{r}
+# Model with only intercept
+lm0 <- lm(bodyfat ~ 1, data = TrainBodyFat1)
+```
+
+```{r}
+# Model with all variables
+lmall <- lm(bodyfat ~ ., data = TrainBodyFat1)
+```
+
+
+6. Use forward stepwise regression to select a subset of the variables.
+
+<span style="color:#48A43F">Once we have constructed the models above, we can use them in the function for running forward stepwise selection. The argument `trace = 0` suppresses intermediate output.</span>
+
+```{r}
+lmfwd <- step(lm0, scope = formula(lmall), direction = "forward", trace = 0)
+```
+
+```{r}
+summary(lmfwd)
+```
+
+<span style="color:#48A43F">Remarkably, only four measurements are selected by the procedure. But let's see how well it predicts body fat....</span>
+
+7. Generate predictions from the forward model and the model with all variables, and compare their RMSEP.
+
+```{r}
+# Predictions from the model with all varaibles
+allpred <- predict(lmall, newdata = TestBodyFat1)
+
+# Predictions from the model selected by forward selection
+fwdpred <- predict(lmfwd, newdata = TestBodyFat1)
+```
+
+```{r}
+Actual <- TestBodyFat1$bodyfat
+RMSEP.all <- sqrt(sum((Actual - allpred)^2)/length(Actual)); RMSEP.all
+RMSEP.fwd <- sqrt(sum((Actual - fwdpred)^2)/length(Actual)); RMSEP.fwd
+```
+
+<span style="color:#48A43F">The key message here is that more variables in a model don't lead to better predictions: a model with four variables yields a smaller RMSEP than a model with many more variables.</span>
+
+8. For the models in 7. construct plots of actual versus predicted values. Which one yields a smaller RMSEP?
+
+```{r fig.width = 10}
+par(mfrow = c(1, 2)) # side-by-side plots
+par(pty = "s") # square plots
+Range <- range(c(Actual, allpred, fwdpred))
+plot(Actual ~ allpred, xlab = "predictions from full model", 
+     ylab = "actual body fat", xlim = Range, ylim = Range)
+abline(0, 1)
+text(Range[1] + 1, Range[2] - 2, labels = paste("RMSEP: ", round(RMSEP.all, 2)), adj = 0)
+plot(Actual ~ fwdpred, xlab = "predictions from forward stepwise model", 
+     ylab = "actual body fat", xlim = Range, ylim = Range)
+text(Range[1] + 1, Range[2] - 2, labels = paste("RMSEP: ", round(RMSEP.fwd, 2)), adj = 0)
+abline(0, 1)
+
+```
+

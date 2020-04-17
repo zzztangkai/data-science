@@ -1,0 +1,34 @@
+```{r}
+print(load("~/Desktop/stat1003/S1_2019_STAT1003_Test_1.rdata"))
+
+```
+
+a. Determine the number of rows therte are in USCrime? What does each row represent?
+```{r}
+dim(USCrime)
+
+# 1250 Rows, each row represent each state in US 
+```
+
+b. Which of the variable in Uscrime are caregorical, and which are quantitative? 
+```{r}
+str(USCrime)
+
+# Abbr, Div, State are categorical and rest of variable are quantitative.
+```
+
+c. how many rows are there in USGeogData? What does each row represent?
+```{r}
+dim(USGeogData)
+```
+
+d. Identify which state has the laegest ares. What is its area?
+```{r}
+USGeogData[which.max(USGeogData$Area),]
+```
+
+e. Using the fucntion subset, create a 
+```{r}
+
+```
+
